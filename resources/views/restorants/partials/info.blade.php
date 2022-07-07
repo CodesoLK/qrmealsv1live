@@ -50,8 +50,24 @@
             <br/>
         @endif
         <br/>
-        @if (!config('app.issd',false))
-            @include('restorants.partials.options')
+        @if(config('app.isft')||true)
+            @include('partials.fields',['fields'=>[
+                ['ftype'=>'bool','name'=>"Pickup",'id'=>"can_pickup",'value'=>$restorant->can_pickup == 1 ? "true" : "false"],
+                ['ftype'=>'bool','name'=>"Delivery",'id'=>"can_deliver",'value'=>$restorant->can_deliver == 1 ? "true" : "false"],
+                ['ftype'=>'bool','name'=>"Free Delivery",'id'=>"free_deliver",'value'=>$restorant->free_deliver == 1 ? "true" : "false"],
+                ['ftype'=>'bool','name'=>"Disable ordering",'id'=>"disable_ordering",'value'=>$restorant->getConfig('disable_ordering', false) ? "true" : "false"],
+            ]])
+            @if(config('app.isft')&&auth()->user()->hasRole('admin'))
+                @include('partials.fields',['fields'=>[
+                    ['ftype'=>'bool','name'=>"Self Delivery",'id'=>"self_deliver",'value'=>$restorant->self_deliver == 1 ? "true" : "false"],
+                ]])
+            @endif
+        @endif  
+        @if (config('app.isqrexact'))
+            @include('partials.fields',['fields'=>[
+                ['ftype'=>'bool','name'=>"Disable Call Waiter",'id'=>"disable_callwaiter",'value'=>$restorant->getConfig('disable_callwaiter', 0) ? "true" : "false"],
+                ['ftype'=>'bool','name'=>"Disable continues orders",'id'=>"disable_continues_ordering",'value'=>$restorant->getConfig('disable_continues_ordering', 0) ? "true" : "false"],
+            ]])
         @endif
         
         <br/>
@@ -62,12 +78,7 @@
                     ['name'=>'resto_wide_logo_dark','label'=>__('Dark restaurant wide logo'),'value'=>$restorant->logowidedark,'style'=>'width: 200px; height: 62px;','help'=>"PNG 650x120 recomended"],
                     ['name'=>'resto_logo','label'=>__('Restaurant Image'),'value'=>$restorant->logom,'style'=>'width: 295px; height: 200px;','help'=>"JPEG 590 x 400 recomended"],
                     ['name'=>'resto_cover','label'=>__('Restaurant Cover Image'),'value'=>$restorant->coverm,'style'=>'width: 200px; height: 100px;','help'=>"JPEG 2000 x 1000 recomended"]
-        ];
-        if(config('app.issd')){
-            unset($images[0]);
-            unset($images[1]);
-            unset($images[3]);
-        }
+                ]
             ?>
             @foreach ($images as $image)
                 <div class="col-md-6">
@@ -91,9 +102,7 @@
         
         </div>
         <div class="col-md-6">
-            @if(!config('app.issd',false))
-                @include('restorants.partials.ordering')
-            @endif
+            @include('restorants.partials.ordering')
             @include('restorants.partials.localisation')
 
             <!-- WHATS APP MODE -->

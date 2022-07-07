@@ -12,6 +12,7 @@
                     <div class="card-body px-lg-5 py-lg-5">
                         <div class="row">
                             <div class="col-sm col-md col-lg text-center" id="modalImgPart">
+                                <div id="modalVideo"></div>
                                 <img id="modalImg" src="" width="295px" height="200px">
                             </div>
                             <div class="col-sm col-md col-lg col-lg" id="modalItemDetailsPart">
@@ -29,7 +30,7 @@
                                     <div id="exrtas-area-inside">
                                     </div>
                                 </div>
-                               @if(!(isset($canDoOrdering)&&!$canDoOrdering) )
+                               @if(  !(isset($canDoOrdering)&&!$canDoOrdering)   )
                                 <div class="quantity-area">
                                     <div class="form-group">
                                         <br />
@@ -59,12 +60,7 @@
                                @endif
                                 <!-- Inform if closed -->
                                 @if (isset($openingTime)&&!empty($openingTime))
-                                        <br />
                                         <span class="closed_time">{{__('Opens')}} {{ $openingTime }}</span>
-                                        @if(!(isset($canDoOrdering)&&!$canDoOrdering))
-                                        <br />
-                                        <span class="text-muted">{{__('Pre orders are possible')}}</span>
-                                        @endif
                                     @endif
                                 <!-- End inform -->
                             </div>

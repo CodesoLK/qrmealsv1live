@@ -2,15 +2,12 @@
 
 @section('extrameta')
 <title>{{ $restorant->name }}</title>
-<meta property="og:image" itemprop="image" content="{{ $restorant->logom }}">
+<meta property="og:image" content="{{ $restorant->logom }}">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="590">
 <meta property="og:image:height" content="400">
 <meta name="og:title" property="og:title" content="{{ $restorant->name }}">
 <meta name="description" content="{{ $restorant->description }}">
-@if (\Akaunting\Module\Facade::has('googleanalytics'))
-    @include('googleanalytics::index') 
-@endif
 @endsection
 
 @section('content')
@@ -21,7 +18,6 @@
         return preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
      }
 ?>
-
 @include('restorants.partials.modals')
 
     <section class="section-profile-cover section-shaped grayscale-05 d-none d-md-none d-lg-block d-lx-block">
@@ -117,6 +113,7 @@
                 @endif
                 <div class="row {{ clean(str_replace(' ', '', strtolower($category->name)).strval($key)) }}">
                     @foreach ($category->aitems as $item)
+                    
                         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
                             <div class="strip">
                                 @if(!empty($item->image))
@@ -127,15 +124,8 @@
                                 <div class="res_title"><b><a onClick="setCurrentItem({{ $item->id }})" href="javascript:void(0)">{{ $item->name }}</a></b></div>
                                 <div class="res_description">{{ $item->short_description}}</div>
                                 <div class="row">
-                                    <div class="col-6">
-                                        <div class="res_mimimum">
-                                            @if ($item->discounted_price>0)
-                                                <span class="text-muted" style="text-decoration: line-through;">@money($item->discounted_price, config('settings.cashier_currency'),config('settings.do_convertion'))</span>
-                                            @endif
-                                            @money($item->price, config('settings.cashier_currency'),config('settings.do_convertion'))
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
+                                    <div class="col-4"><div class="res_mimimum">@money($item->price, config('settings.cashier_currency'),config('settings.do_convertion'))</div></div>
+                                    <div class="col-8">
                                         <div class="allergens" style="text-align: right;">
                                             @foreach ($item->allergens as $allergen)
                                              <div class='allergen' data-toggle="tooltip" data-placement="bottom" title="{{$allergen->title}}" >
@@ -170,8 +160,8 @@
                 
                 <!-- Check if there is value -->
                 @if (strlen($restorant->getConfig('impressum_value',''))>5)
-                    <h3>{{  __($restorant->getConfig('impressum_title','')) }}</h3>
-                    <?php echo __($restorant->getConfig('impressum_value','')); ?>
+                    <h3>{{$restorant->getConfig('impressum_title','')}}</h3>
+                    <?php echo $restorant->getConfig('impressum_value',''); ?>
                 @endif
             @endif
             

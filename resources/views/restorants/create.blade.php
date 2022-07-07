@@ -19,7 +19,7 @@
                     <div class="card-body">
                         <h6 class="heading-small text-muted mb-4">{{ __('Restaurant information') }}</h6>
                         <div class="pl-lg-4">
-                            <form method="post" action="{{ route('admin.restaurants.store') }}">
+                            <form method="post" action="{{ route('admin.restaurants.store') }}" autocomplete="off">
                                 @csrf
                                 <div class="form-group{{ $errors->has('name') ? ' has-danger' : '' }}">
                                     <label class="form-control-label" for="name">{{ __('Restaurant Name') }}</label>
@@ -30,10 +30,10 @@
                                         </span>
                                     @endif
                                 </div>
-                                
+                                </div>
                                 <hr />
                                 <h6 class="heading-small text-muted mb-4">{{ __('Owner information') }}</h6>
-                                
+                                <div class="pl-lg-4">
                                     <div class="form-group{{ $errors->has('name_owner') ? ' has-danger' : '' }}">
                                         <label class="form-control-label" for="name_owner">{{ __('Owner Name') }}</label>
                                         <input type="text" name="name_owner" id="name_owner" class="form-control form-control-alternative{{ $errors->has('name_owner') ? ' is-invalid' : '' }}"  placeholder="{{ __('Owner Name here') }} ..." value="" required autofocus>
@@ -52,7 +52,15 @@
                                             </span>
                                         @endif
                                     </div>
-                                    @include('partials.input',['type'=>"text", 'name'=>'Owner Phone','id'=>"phone_owner",'placeholder'=>"Owner Phone here",'required'=>true,'value'=>""])
+                                    <div class="form-group{{ $errors->has('phone_owner') ? ' has-danger' : '' }}">
+                                        <label class="form-control-label" for="phone_owner">{{ __('Owner Phone') }}</label>
+                                        <input type="text" name="phone_owner" id="phone_owner" class="form-control form-control-alternative{{ $errors->has('phone_owner') ? ' is-invalid' : '' }}"  placeholder="{{ __('Owner Phone here') }} ..." value="" required autofocus>
+                                        @if ($errors->has('phone_owner'))
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $errors->first('phone_owner') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
                                     @if (isset($_GET['cloneWith']))
                                         <input type="hidden" id="cloneWith" name="cloneWith" value="{{ $_GET['cloneWith'] }}" />
                                     @endif
@@ -61,7 +69,6 @@
                                     </div>
                                 </form>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>

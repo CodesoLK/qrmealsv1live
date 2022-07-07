@@ -26,6 +26,7 @@
                 'priceNotFormated'=>$item->price,
                 'price'=>@money($item->price, config('settings.cashier_currency'),config('settings.do_convertion'))."",
                 'image'=>$item->logom,
+                'video_link'=>$item->video_link,
                 'extras'=>$formatedExtras,
                 'options'=>$item->options,
                 'variants'=>$item->variants,
