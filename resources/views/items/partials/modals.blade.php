@@ -154,6 +154,8 @@
                                 </div>
                                 </div>
                             </div>
+                            @include('partials.input',['type'=>"text",'name'=>'Video Link','id'=>'video_link', 'required'=>false, 'placeholder'=>'Youtube link'])
+
                             <input name="category_id" id="category_id" type="hidden" required>
                             <div class="text-center">
                                 <button type="submit" class="btn btn-primary my-4">{{ __('Save') }}</button>
