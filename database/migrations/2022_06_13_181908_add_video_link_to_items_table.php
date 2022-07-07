@@ -14,7 +14,7 @@ class AddVideoLinkToItemsTable extends Migration
     public function up()
     {
         Schema::table('items', function (Blueprint $table) {
-            $table->integer('video_link')->nullable();
+            $table->varchar('video_link')->nullable();
         });
     }
 
