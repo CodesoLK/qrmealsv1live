@@ -89,13 +89,7 @@
             @endisset
 
 
-            @if(
-            \Request::route()->getName() != "newrestaurant.register" && 
-            config('app.ordering')&&
-            !config('settings.is_pos_cloud_mode') && 
-            !config('app.issd') && 
-            (isset($canDoOrdering)?$canDoOrdering:true)
-            )
+            @if(\Request::route()->getName() != "newrestaurant.register" && config('app.ordering')&&!config('settings.is_pos_cloud_mode'))
             <li class="web-menu">
 
               @if(\Request::route()->getName() != "blog"&&
@@ -119,7 +113,7 @@
               @isset($restorant)
                 
                 @if(config('app.isqrsaas'))
-                  @if(\Request::route()->getName() != "cart.checkout" && !$restorant->getConfig('disable_callwaiter', 0) && strlen(config('broadcasting.connections.pusher.app_id')) > 2 && strlen(config('broadcasting.connections.pusher.key')) > 2 && strlen(config('broadcasting.connections.pusher.secret')) > 2&&!config('settings.is_pos_cloud_mode'))
+                  @if(!$restorant->getConfig('disable_callwaiter', 0) && strlen(config('broadcasting.connections.pusher.app_id')) > 2 && strlen(config('broadcasting.connections.pusher.key')) > 2 && strlen(config('broadcasting.connections.pusher.secret')) > 2&&!config('settings.is_pos_cloud_mode'))
                     <a type="button" class="nav-link" data-toggle="modal" data-target="#modal-form">
                       <span class="btn-inner--icon">
                         <i class="fa fa-bell"></i>
@@ -150,11 +144,7 @@
                 @if(
                   \Request::route()->getName() != "blog"&&
                   \Request::route()->getName() != "pages.show"&&
-                \Request::route()->getName() != "newrestaurant.register" 
-                && config('app.ordering') &&
-                !config('app.issd') && 
-                 (isset($canDoOrdering)?$canDoOrdering:true)
-                )
+                \Request::route()->getName() != "newrestaurant.register" && config('app.ordering'))
                 <a id="mobileCartLink" onclick="openNav()" class="nav-link" style="cursor:pointer;">
                     <i class="fa fa-shopping-cart"></i>
                     <span class="nav-link-inner--text">{{ __('Cart') }}</span>

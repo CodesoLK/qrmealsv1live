@@ -5,21 +5,19 @@
                 <i class="ni ni-tv-2 text-primary"></i> {{ __('Dashboard') }}
             </a>
         </li>
-        @if(!config('app.issd'))
-            <li class="nav-item">
-                <a class="nav-link" href="/live">
-                    <i class="ni ni-basket text-success"></i> {{ __('Live Orders') }}<div class="blob red"></div>
-                </a>
-            </li>
-        @endif
 
-        @if(!config('app.issd'))
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('orders.index') }}">
-                    <i class="ni ni-basket text-orangse"></i> {{ __('Orders') }}
-                </a>
-            </li>
-        @endif
+        <li class="nav-item">
+            <a class="nav-link" href="/live">
+                <i class="ni ni-basket text-success"></i> {{ __('Live Orders') }}<div class="blob red"></div>
+            </a>
+        </li>
+
+
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('orders.index') }}">
+                <i class="ni ni-basket text-orangse"></i> {{ __('Orders') }}
+            </a>
+        </li>
     @endif
 
     <li class="nav-item">
@@ -27,23 +25,19 @@
             <i class="ni ni-shop text-info"></i> {{ __('Restaurant') }}
         </a>
     </li>
-    @if(!config('app.issd'))
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('items.index') }}">
-                <i class="ni ni-collection text-pink"></i> {{ __('Menu') }}
-            </a>
-        </li>
-    @endif
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('items.index') }}">
+            <i class="ni ni-collection text-pink"></i> {{ __('Menu') }}
+        </a>
+    </li>
 
     @if (config('app.isqrsaas') && (!config('settings.qrsaas_disable_odering') || config('settings.enable_guest_log')))
         @if(!config('settings.is_whatsapp_ordering_mode') || in_array("poscloud", config('global.modules',[]))  || in_array("deliveryqr", config('global.modules',[])) )
-            @if (!config('app.isag')&&!config('app.issd'))
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.restaurant.tables.index') }}">
-                        <i class="ni ni-ungroup text-red"></i> {{ __('Tables') }}
-                    </a>
-                </li>
-            @endif
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('admin.restaurant.tables.index') }}">
+                    <i class="ni ni-ungroup text-red"></i> {{ __('Tables') }}
+                </a>
+            </li>
         @endif
     @elseif (config('app.isft') && in_array("poscloud", config('global.modules',[])) )
         <li class="nav-item">
@@ -53,7 +47,6 @@
         </li>
     @endif
 
-    <!-- Exrta menus -->
     @foreach (auth()->user()->getExtraMenus() as $menu)
             <li class="nav-item">
                 <a class="nav-link" href="{{ route($menu['route'],isset($menu['params'])?$menu['params']:[]) }}">
@@ -63,7 +56,7 @@
     @endforeach
     
 
-    @if (config('app.isqrexact'))
+    @if (config('app.isqrsaas')&&!config('settings.is_whatsapp_ordering_mode')&&!config('settings.is_pos_cloud_mode'))
         <li class="nav-item">
             <a class="nav-link" href="{{ route('qr') }}">
                 <i class="ni ni-mobile-button text-red"></i> {{ __('QR Builder') }}
@@ -78,7 +71,7 @@
         @endif
     @endif
 
-    @if ((config('settings.is_agris_mode') || config('settings.is_whatsapp_ordering_mode')  || in_array("poscloud", config('global.modules',[]))  ||  in_array("deliveryqr", config('global.modules',[]))  ))
+    @if (config('app.isqrsaas')&&(config('settings.is_whatsapp_ordering_mode') || in_array("poscloud", config('global.modules',[]))  ||  in_array("deliveryqr", config('global.modules',[]))  ))
         <li class="nav-item">
             <a class="nav-link" href="{{ route('admin.restaurant.simpledelivery.index') }}">
                 <i class="ni ni-pin-3 text-blue"></i> {{ __('Delivery areas') }}
@@ -113,7 +106,7 @@
         @endif
 
 
-    @if (!config('settings.is_pos_cloud_mode')&&!config('app.issd'))
+    @if (!config('settings.is_pos_cloud_mode'))
         <li class="nav-item">
             <a class="nav-link" href="{{ route('share.menu') }}">
                 <i class="ni ni-send text-green"></i> {{ __('Share') }}
@@ -123,36 +116,3 @@
     
 
 </ul>
-@if (config('vendorlinks.enable',false))
-<hr class="my-3">
-<h6 class="navbar-heading p-0 text-muted">
-    <span class="docs-normal">{{__(config('vendorlinks.name',""))}}</span>
-</h6>
-<ul class="navbar-nav mb-md-3">
-    @if (strlen(config('vendorlinks.link1link',""))>4)
-        <li class="nav-item">
-            <a class="nav-link" href="{{config('vendorlinks.link1link',"")}}" target="_blank">
-                <span class="nav-link-text">{{__(config('vendorlinks.link1name',""))}}</span>
-            </a>
-        </li>
-    @endif
-
-    @if (strlen(config('vendorlinks.link2link',""))>4)
-        <li class="nav-item">
-            <a class="nav-link" href="{{config('vendorlinks.link2link',"")}}" target="_blank">
-                <span class="nav-link-text">{{__(config('vendorlinks.link2name',""))}}</span>
-            </a>
-        </li>
-    @endif
-
-    @if (strlen(config('vendorlinks.link3link',""))>4)
-        <li class="nav-item">
-            <a class="nav-link" href="{{config('vendorlinks.link3link',"")}}" target="_blank">
-                <span class="nav-link-text">{{__(config('vendorlinks.link3name',""))}}</span>
-            </a>
-        </li>
-    @endif
-    
-</ul>
-@endif
-

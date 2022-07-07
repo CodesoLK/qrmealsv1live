@@ -78,7 +78,7 @@
          </li>
          @endif
         @if(config('app.isqrsaas'))
-            @if(config('settings.showlandingmanagment',false)||!config('app.isqrexact'))
+            @if(config('settings.showlandingmanagment',false)||config('settings.is_whatsapp_ordering_mode')||config('settings.is_pos_cloud_mode'))
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.landing') }}">
                         <i class="ni ni-html5 text-green"></i> {{ __('Landing Page') }}

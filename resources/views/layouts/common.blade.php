@@ -14,7 +14,7 @@
     function initPhone(name){
         var input = document.querySelector("input[name='"+name+"']");
         if(input!=null){
-            var iti=window.intlTelInput(input, {
+            window.intlTelInput(input, {
               nationalMode:true,
                 hiddenInput: name,
                 //customContainer:"form-controls",
@@ -32,26 +32,13 @@
             });
 
 
-        var reset = function() {
+    var reset = function() {
 		  input.classList.remove("error");
-          setTheHidden();
 		};
-
-        var setTheHidden =function(){
-            var theHidden=document.querySelector("input[type=hidden][name='"+name+"']");
-            theHidden.value = iti.getSelectedCountryData().dialCode+input.value;
-            console.log(theHidden.value);
-        }
 
 
 		input.addEventListener('change', reset);
 		input.addEventListener('keyup', reset);	 
-
-        input.addEventListener("countrychange", function() {
-            setTheHidden();
-        });
-
-        setTheHidden();
 
         }
     }
@@ -60,8 +47,6 @@
             initPhone('phone');
             initPhone('phone_owner');
             initPhone('phone_number');
-            //initPhone('phone_driver');
-            
             
         }, 3000);
   
