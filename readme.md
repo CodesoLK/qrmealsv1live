@@ -1,9 +1,5 @@
-# FoodTiger | QR SaaS | WhatsApp | LionPOS
-
-[![FT](https://i.imgur.com/gcgJEb2.jpg)](https://codecanyon.net/user/mobidonia/portfolio)
-[![QR](https://i.imgur.com/bqpWgnU.jpg)](https://codecanyon.net/user/mobidonia/portfolio)
-[![WP](https://i.imgur.com/VgHDizv.jpg)](https://codecanyon.net/user/mobidonia/portfolio)
-
+##Versions 
+Qrmealsv1.0.0 First commit
 
 ## Test
 sail artisan test --testsuite=Feature
@@ -26,6 +22,7 @@ MAIL_MAILER=smtp
 MAIL_HOST=mailhog
 MAIL_PORT=1025
 MAIL_USERNAME=null
+
 MAIL_PASSWORD=null
 MAIL_ENCRYPTION=
 MAIL_FROM_ADDRESS='test@example.com'
