@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Services\ConfChanger;
 use Akaunting\Module\Facade as Module;
 use App\Models\Allergens;
+use App\SubCategory;
 
 class ItemsController extends Controller
 {
@@ -33,8 +34,8 @@ class ItemsController extends Controller
     {
         if (auth()->user()->hasRole('owner')) {
 
-            
             $canAdd = auth()->user()->restorant->getPlanAttribute()['canAddNewItems'];
+      
             
 
             //Change language
@@ -67,8 +68,6 @@ class ItemsController extends Controller
                 $newDefault->default=1;
                 $newDefault->update();
                 
-                
-                
             }
 
             $currentEnvLanguage = isset(config('config.env')[2]['fields'][0]['data'][config('app.locale')]) ? config('config.env')[2]['fields'][0]['data'][config('app.locale')] : 'UNKNOWN';
@@ -91,6 +90,13 @@ class ItemsController extends Controller
                 $categories=auth()->user()->restorant->categories;
             }
 
+            $get_category_id = $categories->pluck('id');
+            $auth_user_restaurant_id=auth()->user()->restorant->id;
+            $sub_categories = SubCategory::where('restaurant_id',$auth_user_restaurant_id)
+                                            ->where('parent_id',null)
+                                            ->whereIn('category_id',$get_category_id)
+                                            ->get();
+
             return view('items.index', [
                 'hasMenuPDf'=>Module::has('menupdf'),
                 'canAdd'=>$canAdd,
@@ -98,7 +104,8 @@ class ItemsController extends Controller
                 'restorant_id' => auth()->user()->restorant->id,
                 'currentLanguage'=> $currentEnvLanguage,
                 'availableLanguages'=>auth()->user()->restorant->localmenus,
-                'defaultLanguage'=>$defaultLng?$defaultLng->language:""
+                'defaultLanguage'=>$defaultLng?$defaultLng->language:"",
+                'sub_categories' => $sub_categories
                 ]);
         } else {
             return redirect()->route('orders.index')->withStatus(__('No Access'));
@@ -143,6 +150,14 @@ class ItemsController extends Controller
             $defVat=$resto->getConfig('default_tax_value',0);
         }
         $item->vat=$defVat;
+
+        if($request->parent_id && $request->parent_id != "") {
+            $item->parent_id = strip_tags($request->parent_id);
+            $item->category_type = 0;
+        }else {
+            $item->parent_id = null;
+            $item->category_type = 1;
+        }
         
         if ($request->hasFile('item_image')) {
             $item->image = $this->saveImageVersions(
@@ -158,7 +173,7 @@ class ItemsController extends Controller
         }
         $item->save();
 
-        return redirect()->route('items.index')->withStatus(__('Item successfully updated.'));
+        return redirect()->route('items.index')->withStatus(__('Item successfully Added.'));
     }
 
     /**
@@ -183,9 +198,6 @@ class ItemsController extends Controller
         //if item belongs to owner restorant menu return view
         if (auth()->user()->hasRole('owner') && $item->category->restorant->id == auth()->user()->restorant->id || auth()->user()->hasRole('admin')) {
             
-            //Change currency
-            ConfChanger::switchCurrency($item->category->restorant);
-
             $extraViews=[];
             foreach (Module::all() as $key => $module) {
                 if(is_array($module->get('menuview'))){
@@ -194,9 +206,6 @@ class ItemsController extends Controller
                     }
                 }
             }
-
-            
-            
             
             return view('items.edit',
             [
@@ -229,8 +238,6 @@ class ItemsController extends Controller
             $makeVariantsRecreate=true;
         }
         $item->price = strip_tags($request->item_price);
-        $item->discounted_price = strip_tags($request->discounted_price);
-
         if (isset($request->vat)) {
             $item->vat = $request->vat;
         }
@@ -274,19 +281,13 @@ class ItemsController extends Controller
         }
 
         if ($request->hasFile('item_image')) {
-            $request->validate([
-                'item_image' => ['dimensions:max_width=2000'],
-            ]);
             if ($request->hasFile('item_image')) {
-                $large_image=['name'=>'large'];
-                if(config('settings.do_large_image_resize',false)){
-                    $large_image=['name'=>'large', 'w'=>590, 'h'=>400];
-                }
                 $item->image = $this->saveImageVersions(
                     $this->imagePath,
                     $request->item_image,
                     [
-                        $large_image,
+                        ['name'=>'large'],
+                        //['name'=>'thumbnail','w'=>300,'h'=>300],
                         ['name'=>'medium', 'w'=>295, 'h'=>200],
                         ['name'=>'thumbnail', 'w'=>200, 'h'=>200],
                     ]
