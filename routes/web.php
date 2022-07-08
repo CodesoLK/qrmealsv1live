@@ -23,13 +23,16 @@ Route::post('/search/location', 'FrontEndController@getCurrentLocation')->name('
 Auth::routes(['register' => config('app.isft')]);
 
 
-Route::get('/home/{lang?}', 'HomeController@index')->name('home')->middleware('isOwnerOnPro');
+//Route::get('/home/{lang?}', 'HomeController@index')->name('home')->middleware('isOwnerOnPro');
 
 Route::get('/selectpay/{order}', 'PaymentController@selectPaymentGateway')->name('selectpay');
 Route::get('/selectedpaymentt/{order}/{payment}', 'PaymentController@selectedPaymentGateway')->name('selectedpaymentt');
 
 
-Route::group(['middleware' => ['auth']], function () {
+//Route::group(['middleware' => ['auth']], function () {
+Route::group(['middleware' => ['auth','impersonate']], function () {
+    Route::get('/home/{lang?}', 'HomeController@index')->name('home')->middleware(['isOwnerOnPro','verifiedSetup']);
+
     Route::resource('user', 'UserController', ['except' => ['show']]);
     Route::post('/user/push', 'UserController@checkPushNotificationId');
 
@@ -38,6 +41,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('dontsyncV1UsersToAuth0', 'SettingsController@dontsyncV1UsersToAuth0')->name('dontsyncV1UsersToAuth0');
         Route::resource('restaurants', 'RestorantController');
         Route::put('restaurants_app_update/{restaurant}', 'RestorantController@updateApps')->name('restaurant.updateApps');
+        Route::get('stopimpersonate', 'RestorantController@stopImpersonate')->name('restaurants.stopImpersonate');
 
         Route::get('restaurants_add_new_shift/{restaurant}', 'RestorantController@addnewshift')->name('restaurant.addshift');
 
