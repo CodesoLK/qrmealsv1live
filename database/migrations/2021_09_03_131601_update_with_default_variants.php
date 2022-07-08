@@ -13,17 +13,15 @@ class UpdateWithDefaultVariants extends Migration
      */
     public function up()
     {
-        if(Schema::hasTable('items')){
-            Schema::table('items', function (Blueprint $table) {
-                $table->integer('enable_system_variants')->default(0);
-            });
-        }
+        Schema::table('items', function (Blueprint $table) {
+            $table->integer('enable_system_variants')->default(0);
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->integer('category_type')->default(1);
+        });
 
-        if(Schema::hasTable('variants')){
-            Schema::table('variants', function (Blueprint $table) {
-                $table->integer('is_system')->default(0);
-            });
-        }
+        Schema::table('variants', function (Blueprint $table) {
+            $table->integer('is_system')->default(0);
+        });
     }
 
     /**
