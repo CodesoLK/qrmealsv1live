@@ -30,6 +30,7 @@ use App\Models\Process;
 use Akaunting\Module\Facade as Module;
 use App\Models\Allergens;
 use App\Models\Config;
+use App\SubCategory;
 use DateTime;
 use Spatie\OpeningHours\Exceptions\MaximumLimitExceeded;
 
@@ -195,9 +196,6 @@ class FrontEndController extends Controller
             }else if(config('settings.is_agris_mode')){
                 //Agris Mode
                 return $this->agrisMode();
-            }else if(config('app.issd')){
-                //Social Drive Mode
-                return $this->taxiMode();
             }else{
                 //Default QR
                 return $this->qrsaasMode();
@@ -310,7 +308,7 @@ class FrontEndController extends Controller
                 ]);
             }
 
-            $featured_vendors=Restorant::where('active',1)->where('is_featured',1)->get()->shuffle();
+            $featured_vendors=Restorant::where('active',1)->where('is_featured',0)->get()->shuffle();
            
 
             $response = new \Illuminate\Http\Response(view('qrsaas.'.config('settings.qr_landing'), [
@@ -343,19 +341,13 @@ class FrontEndController extends Controller
 
         //Set the cookie of the last entered address
         $lastaddress = Cookie::get('lastaddress');
-
-        $langs=$this->handleLangs();
         $response = new \Illuminate\Http\Response(view('welcome', [
             'sections' =>[['super_title'=>__('Cities'), 'title'=>__('Find us in these cities and many more!'), 'cities'=>City::where('id', '>', 0)->get()]],
             'lastaddress'=>$lastaddress,
-            'availableLanguages'=>$langs[0],
-            'locale'=>$langs[1]
         ]));
         if (\Request::has('location') && strlen(\Request::input('location')) > 1) {
             $response->withCookie(cookie('lastaddress', \Request::input('location'), 120));
         }
-        $response->withCookie(cookie('lang', $langs[1], 120));
-
 
         return $response;
     }
@@ -398,7 +390,7 @@ class FrontEndController extends Controller
             $testimonials = Testimonials::where('post_type', 'testimonial')->get();
             $processes = Process::where('post_type', 'process')->get();
 
-            $featured_vendors=Restorant::where('active',1)->where('is_featured',1)->get()->shuffle();
+            $featured_vendors=Restorant::where('active',1)->where('is_featured',0)->get()->shuffle();
             $demoLink="#";
             $demoVendor=Restorant::where('subdomain',config('settings.demo_restaurant_slug'))->first();
             if($demoVendor){
@@ -525,7 +517,6 @@ class FrontEndController extends Controller
                 'pages' => Pages::where('showAsLink', 1)->get(),
                 'featured_vendors'=>Restorant::where('active',1)->where('is_featured',0)->get()->shuffle(),
                 'features' => $features,
-                'faqs' =>  Process::where('post_type', 'faq')->get(),
                 'testimonials' => $testimonials,
                 'processes' => $processes
             ]));
@@ -537,65 +528,8 @@ class FrontEndController extends Controller
         }
     }
 
-    /**
-     * 7. Taxi Mode.
-     */
-    public function taxiMode(){
-        if (config('settings.disable_landing')) {
-            //With disabled landing
-            return redirect()->route('login');
-        } else {
-            //Normal, with landing
-            $plans = config('settings.forceUserToPay',false)?Plans::where('id','!=',intval(config('settings.free_pricing_id')))->get()->toArray():Plans::get()->toArray();
-            $colCounter = [12, 6, 4, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
 
-            $availableLanguagesENV = config('settings.front_languages');
-            $exploded = explode(',', $availableLanguagesENV);
-            $availableLanguages = [];
-            for ($i = 0; $i < count($exploded); $i += 2) {
-                $availableLanguages[$exploded[$i]] = $exploded[$i + 1];
-            }
-
-            $locale = Cookie::get('lang') ? Cookie::get('lang') : config('settings.app_locale');
-            $route = Route::current();
-            $name = Route::currentRouteName();
-            $query = 'lang.';
-            if (substr($name, 0, strlen($query)) === $query) {
-                //this is language route
-                $exploded = explode('.', $name);
-                $lang = strtoupper($exploded[1]);
-                $locale = $lang;
-            }
-            App::setLocale(strtolower($locale));
-            session(['applocale_change' => strtolower($locale)]);
-
-            //Landing page content
-            $features = Features::where('post_type', 'feature')->get();
-            $testimonials = Testimonials::where('post_type', 'testimonial')->get();
-            $processes = Process::where('post_type', 'process')->get();
-            $blog_posts = Process::where('post_type', 'blog')->get();
-
-            $response = new \Illuminate\Http\Response(view('taxilanding.home', [
-                'col' => $colCounter[count($plans)-1],
-                'plans' => $plans,
-                'availableLanguages' => $availableLanguages,
-                'locale' => $locale,
-                'pages' => Pages::where('showAsLink', 1)->get(),
-                'featured_vendors'=>Restorant::where('active',1)->where('is_featured',0)->get()->shuffle(),
-                'features' => $features,
-                'faqs' =>  Process::where('post_type', 'faq')->get(),
-                'testimonials' => $testimonials,
-                'processes' => $processes,
-                'blog_posts' => $blog_posts
-            ]));
-
-            $response->withCookie(cookie('lang', $locale, 120));
-            App::setLocale(strtolower($locale));
-
-            return $response;
-        }
-    }
-
+    
 
     /**
      * Show stores.
@@ -767,55 +701,18 @@ class FrontEndController extends Controller
             }
         }
 
-        
-
-        
-        $langs=$this->handleLangs();
-
         //Set the cookie of the last entered address
         $lastaddress = Cookie::get('lastaddress');
         $response = new \Illuminate\Http\Response(view('welcome', [
             'sections' => $sections,
             'lastaddress'=> $lastaddress,
             'banners' => $banners,
-            'availableLanguages'=>$langs[0],
-            'locale'=>$langs[1]
         ]));
         if (\Request::has('location') && strlen(\Request::input('location')) > 1) {
             $response->withCookie(cookie('lastaddress', \Request::input('location'), 120));
         }
-        $response->withCookie(cookie('lang', $langs[1], 120));
 
         return $response;
-    }
-
-    private function handleLangs(){
-
-        $availableLanguagesENV = config('settings.front_languages');
-        $exploded = explode(',', $availableLanguagesENV);
-        $availableLanguages = [];
-        for ($i = 0; $i < count($exploded); $i += 2) {
-            $availableLanguages[$exploded[$i]] = $exploded[$i + 1];
-        }
-
-        $locale = Cookie::get('lang') ? Cookie::get('lang') : config('settings.app_locale');
-        $route = Route::current();
-        $name = Route::currentRouteName();
-        $query = 'lang.';
-        if (substr($name, 0, strlen($query)) === $query) {
-            //this is language route
-            $exploded = explode('.', $name);
-            $lang = strtoupper($exploded[1]);
-            $locale = $lang;
-
-
-            if($locale!="android-chrome-256x256.png"){
-                App::setLocale(strtolower($locale));
-                session(['applocale_change' => strtolower($locale)]);
-            }
-        }
-      
-        return [$availableLanguages,$locale];
     }
 
     private function withinArea($point, $polygon, $n)
@@ -842,25 +739,11 @@ class FrontEndController extends Controller
         return $oddNodes;
     }
 
-    public function onboarding(){
-        $plans = config('settings.forceUserToPay',false)?Plans::where('id','!=',intval(config('settings.free_pricing_id')))->get()->toArray():Plans::get()->toArray();
-        $colCounter = [12, 6, 4, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
-        return view('taxilanding.onboarding',[
-            'faqs' =>  Process::where('post_type', 'faq')->get(),
-            'col'=>$colCounter[count($plans)],
-            'plans'=>$plans,
-        ]);
-    }
-
     public function restorant($alias)
     {
-       
 
         //Do we have impressum app
         $doWeHaveImpressumApp=Module::has('impressum');
-       
-
-        
 
 
         $subDomain = $this->getSubDomain();
@@ -868,18 +751,6 @@ class FrontEndController extends Controller
             return redirect()->route('restorant', $subDomain);
         }
         $restorant = Restorant::whereRaw('REPLACE(subdomain, "-", "") = ?', [str_replace("-","",$alias)])->first();
-
-        $doWeHaveOrderAfterHours=Module::has('orderdatetime')&&$restorant->getConfig('order_date_time_enable',false);
-
-        //Template switcher
-        $menuTemplate=config('settings.front_end_template','defaulttemplate');
-        if(Module::has('themeswitcher')){
-            $vendorTemplate=$restorant->getConfig('menu_template',$menuTemplate);
-            //dd($vendorTemplate);    
-            config(['settings.front_end_template' =>$vendorTemplate ]);
-            $menuTemplate=$vendorTemplate;
-        }
-        
 
         //Do we have google translate app
         $doWeHaveGoogleTranslateApp=Module::has('googletranslate')&&$restorant->getConfig('gt_enable',false)=="true";
@@ -953,7 +824,7 @@ class FrontEndController extends Controller
            $formatter->setPattern(config('settings.datetime_workinghours_display_format_new'));
            $formatter->setTimeZone($tz);
 
-         
+           $menuTemplate=config('settings.front_end_template','defaulttemplate');
            $viewFile='restorants.show';
            if($menuTemplate!='defaulttemplate'){
             $viewFile=config('settings.front_end_template','defaulttemplate')."::show";
@@ -963,7 +834,7 @@ class FrontEndController extends Controller
            $wh=$businessHours->forWeek();
            
 
-           $canDoOrdering=$canDoOrdering&&($businessHours->isOpen()||$doWeHaveOrderAfterHours);
+           $canDoOrdering=$canDoOrdering&&$businessHours->isOpen();
            if ($restorant->getConfig('disable_ordering', false)){
             $canDoOrdering=false;
            }
@@ -977,6 +848,12 @@ class FrontEndController extends Controller
                //throw $th;
            }
 
+            $categories_id = $restorant->categories->pluck('id');
+           $subCategories = SubCategory::where('restaurant_id',$restorant->id)
+                                        ->where('parent_id',null)
+                                        ->whereIn('category_id',$categories_id)
+                                        ->get();
+
 
 
            $viewData=[
@@ -987,9 +864,8 @@ class FrontEndController extends Controller
                 'restorant' => $restorant,
                 'openingTime' => $openingTime,
                 'closingTime' => $closingTime,
-                'doWeHaveOrderAfterHours'=> $doWeHaveOrderAfterHours,
                 'usernames' => $usernames,
-                'canDoOrdering'=>$canDoOrdering,
+                'canDoOrdering'=>$canDoOrdering&&$businessHours->isOpen(),
                 'currentLanguage'=>$currentEnvLanguage,
                 'showGoogleTranslate'=>$doWeHaveGoogleTranslateApp,
                 'showAllGTLanguages'=>$restorant->getConfig('gt_all',true),
@@ -997,8 +873,9 @@ class FrontEndController extends Controller
                 'showLanguagesSelector'=>env('ENABLE_MILTILANGUAGE_MENUS', false) && $restorant->localmenus()->count() > 1,
                 'hasGuestOrders'=>count($previousOrderArray) > 0,
                 'fields'=>[['class'=>'col-12', 'classselect'=>'noselecttwo', 'ftype'=>'select', 'name'=>'Table', 'id'=>'table_id', 'placeholder'=>'Select table', 'data'=>$tablesData, 'required'=>true]],
+                'sub_categories'=>$subCategories,
            ];
-    
+           
 
            $response = new \Illuminate\Http\Response(view($viewFile,$viewData));
 
@@ -1013,6 +890,8 @@ class FrontEndController extends Controller
             return abort(404,__('The selected restaurant is not active at this moment!'));
         }
     }
+
+
 
     public function findByLocation(Request $request)
     {
@@ -1030,6 +909,134 @@ class FrontEndController extends Controller
             'data' => $res,
             'status' => true,
             'errMsg' => '',
+        ]);
+    }
+
+
+
+    public function viewAjax(Request $request)
+    {
+        $category_id = $request->category;
+        $parent_id = $request->parent;
+        $category_name = $request->category_name;
+        $key = $request->loop_key;
+        $data = [];
+        $data['category-name'] = $category_name;
+        $data['key'] = $key;
+        $data['back-btn-off'] = "";
+
+        $get_restaurant_id = Categories::where('id',$category_id)->first()->restorant_id;
+
+        if($request->back_click && $request->back_click == 'clicked') {
+            // Get Parent Id
+            $getSubCategory = SubCategory::find($parent_id);
+
+            if($getSubCategory->parent_id == "" || $getSubCategory->parent_id == null) {
+                // only main Category information show
+
+                $sub_categories = SubCategory::where('restaurant_id',$get_restaurant_id)
+                                            ->where('parent_id',null)
+                                            ->where('category_id',$category_id)
+                                            ->get();
+                // return print_r($sub_categories);
+                
+                if($sub_categories == true) {
+                    $data['sub-categories'] = $sub_categories;
+                    $data['sub_success'] = "success";
+                }else {
+                    $data['error'] = "Something Worng! Please Try Again.";
+                }
+
+                // Get Items
+                $getItems = Items::where('category_id',$category_id)
+                            ->where('category_type',1)
+                            ->where('parent_id',null)
+                            ->orderBy('id','desc')
+                            ->get();
+
+                if($getItems == true) {
+                    $data['items'] = $getItems;
+                    $data['item_success'] = "success";
+                }else {
+                    $data['error'] = "Something Worng! Please Try Again.";
+                }
+
+                $data['back-btn-off'] = 'd-none';
+
+            }else {
+                $parent_id = $getSubCategory->parent_id;
+
+                $getSubCategories = SubCategory::where('restaurant_id',$get_restaurant_id)
+                                            ->where('category_id',$category_id)
+                                            ->where('parent_id',$parent_id)
+                                            ->orderBy('id','desc')
+                                            ->get();
+    
+                if($getSubCategories == true) {
+                    $data['sub-categories'] = $getSubCategories;
+                    $data['sub_success'] = "success";
+                }else {
+                    $data['error'] = "Something Worng! Please Try Again.";
+                }
+
+
+                $getItems = Items::where('category_id',$category_id)
+                            ->where('category_type',0)
+                            ->where('parent_id',$parent_id)
+                            ->orderBy('id','desc')
+                            ->get();
+    
+                if($getItems == true) {
+                    $data['items'] = $getItems;
+                    $data['item_success'] = "success";
+                }else {
+                    $data['error'] = "Something Worng! Please Try Again.";
+                }
+
+            }
+
+        }else {
+            if($category_id == "" || $parent_id == "") {
+                $data['error'] = "Something Worng! Please Try Again.";
+            }
+    
+            $getSubCategory = SubCategory::where('restaurant_id',$get_restaurant_id)
+                                            ->where('category_id',$category_id)
+                                            ->where('parent_id',$parent_id)
+                                            ->orderBy('id','desc')
+                                            ->get();
+    
+            if($getSubCategory == true) {
+                $data['sub-categories'] = $getSubCategory;
+                $data['sub_success'] = "success";
+            }else {
+                $data['error'] = "Something Worng! Please Try Again.";
+            }
+            
+            $getItems = Items::where('category_id',$category_id)
+                            ->where('category_type',0)
+                            ->where('parent_id',$parent_id)
+                            ->orderBy('id','desc')
+                            ->get();
+    
+            if($getItems == true) {
+                $data['items'] = $getItems;
+                $data['item_success'] = "success";
+            }else {
+                $data['error'] = "Something Worng! Please Try Again.";
+            }
+        }
+
+        $data['category_id'] = $category_id;
+        $data['restaurant_id'] = $get_restaurant_id;
+        $data['parent_id'] = $parent_id;
+        $data['allergens'] = in_array("allergens", config('global.modules',[]))?Allergens::where('post_type','allergen')->get():[];
+
+        // return print_r($data['allergens']);
+
+                                    
+        return view('restorants.font-end-ajax',[
+            'data'=>$data
         ]);
     }
 }

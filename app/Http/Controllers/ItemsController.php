@@ -35,7 +35,6 @@ class ItemsController extends Controller
         if (auth()->user()->hasRole('owner')) {
 
             $canAdd = auth()->user()->restorant->getPlanAttribute()['canAddNewItems'];
-      
             
 
             //Change language
