@@ -43,7 +43,6 @@
 @endsection
 
 
-
 @section('content')
 
     @include('items.partials.modals', ['restorant_id' => $restorant_id])
@@ -390,6 +389,8 @@
             var subCatId = $(this).attr('data-sub');
             var category = $(this).attr('data-category');
             var formAction = "/sub-category/delete";
+
+
             var CSRF = '@csrf';
 
             var deleteForm = `<form method='post' id="sub-category-delete" action='${formAction}'>

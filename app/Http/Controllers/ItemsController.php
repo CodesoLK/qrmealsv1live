@@ -143,6 +143,7 @@ class ItemsController extends Controller
         $item->description = strip_tags($request->item_description);
         $item->price = strip_tags($request->item_price);
         $item->category_id = strip_tags($request->category_id);
+        $item->video_link = $request->video_link;
         $defVat=0;
         $resto=$this->getRestaurant();
         if($resto){
@@ -229,10 +230,12 @@ class ItemsController extends Controller
      */
     public function update(Request $request, Items $item)
     {
+        // dd("O");
         $makeVariantsRecreate=false;
         $item->name = strip_tags($request->item_name);
         $item->description = strip_tags($request->item_description);
         $item->category_id = $request->category_id;
+        $item->video_link = $request->video_link;
         if($item->price!=strip_tags($request->item_price)){
             $makeVariantsRecreate=true;
         }

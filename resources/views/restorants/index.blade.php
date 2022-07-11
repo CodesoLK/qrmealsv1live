@@ -17,9 +17,7 @@
                                 <h3 class="mb-0">{{ __('Restaurants') }}</h3>
                             </div>
                             <div class="col-4 text-right">
-                                @if(auth()->user()->hasRole('admin'))
-                                    <a href="{{ route('admin.restaurants.create') }}" class="btn btn-sm btn-primary">{{ __('Add Restaurant') }}</a>
-                                @endif
+                                <a href="{{ route('admin.restaurants.create') }}" class="btn btn-sm btn-primary">{{ __('Add Restaurant') }}</a>
                                 @if(auth()->user()->hasRole('admin') && config('settings.enable_import_csv'))
                                     <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal-import-restaurants">{{ __('Import from CSV') }}</button>
                                 @endif
@@ -46,12 +44,7 @@
                             <tbody>
                                 @foreach ($restorants as $restorant)
                                     <tr>
-                                        @if(auth()->user()->hasRole('manager'))
-                                            <td><a href="{{ route('admin.restaurants.loginas', $restorant) }}">{{ $restorant->name }}</a></td>
-                                        @else
-                                            <td><a href="{{ route('admin.restaurants.edit', $restorant) }}">{{ $restorant->name }}</a></td>
-                                        @endif
-                                       
+                                        <td><a href="{{ route('admin.restaurants.edit', $restorant) }}">{{ $restorant->name }}</a></td>
                                         <td><img class="rounded" src={{ $restorant->icon }} width="50px" height="50px"></img></td>
                                         <td>{{  $restorant->user?$restorant->user->name:__('Deleted') }}</td>
                                         <td>
@@ -73,9 +66,6 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" href="{{ route('admin.restaurants.edit', $restorant) }}">{{ __('Edit') }}</a>
                                                     <a class="dropdown-item" href="{{ route('admin.restaurants.loginas', $restorant) }}">{{ __('Login as') }}</a>
-                                                    @if ($hasCloner)
-                                                     <a class="dropdown-item" href="{{ route('admin.restaurants.create')."?cloneWith=".$restorant->id }}">{{ __('Clone it') }}</a>
-                                                    @endif
                                                     <form action="{{ route('admin.restaurants.destroy', $restorant) }}" method="post">
                                                         @csrf
                                                         @method('delete')

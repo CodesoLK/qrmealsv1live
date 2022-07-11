@@ -1,6 +1,6 @@
 <nav id="navbar-main" class="navbar navbar-top navbar-horizontal navbar-expand-md bg-white navbar-dark">
 
-  @if(config('app.isqrsaas') && config('settings.disable_landing') && !(config('settings.hide_register_when_disabled_landing',false)))
+  @if(config('app.isqrsaas') && config('settings.disable_landing'))
   
   <!-- Big Screen with buttton-->
  <div class="container-fluid px-7 d-none d-lg-flex d-lx-flex">
@@ -8,7 +8,7 @@
         <img src="{{ config('global.site_logo') }}" />
       </a>
       <!--<div class="navbar-collapse navbar-custom-collapse collapse" id="navbar-collapse">-->
-      @if(config('app.isqrsaas') && config('settings.disable_landing')  )
+      @if(config('app.isqrsaas') && config('settings.disable_landing'))
         <ul class="navbar-nav align-items-lg-center ml-lg-auto">
           <li class="nav-item ml-lg-4">
             <a href="{{ route('newrestaurant.register') }}" target="_blank" class="btn btn-neutral btn-icon">
@@ -28,7 +28,7 @@
         <img src="{{ config('global.site_logo') }}" />
       </a>
       <!--<div class="navbar-collapse navbar-custom-collapse collapse" id="navbar-collapse">-->
-      @if(config('app.isqrsaas') && config('settings.disable_landing') && !(config('settings.hide_register_when_disabled_landing',false)))
+      @if(config('app.isqrsaas') && config('settings.disable_landing'))
         <ul class="navbar-nav align-items-lg-center ml-lg-auto">
           <li class="nav-item ml-lg-4">
             <a href="{{ route('newrestaurant.register') }}" target="_blank" class="btn btn-neutral btn-icon">

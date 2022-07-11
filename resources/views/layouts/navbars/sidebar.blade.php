@@ -60,26 +60,8 @@
                 </div>
             </div>
             <!-- Navigation -->
-            @if(Auth::user()->isImpersonating())
-                <hr class="my-3">
-                <ul class="navbar-nav ">
-                    <li class="nav-item">
-                      <a class="nav-link active active-pro" href="{{ route('admin.restaurants.stopImpersonate') }}">
-                        <i class="ni ni-button-power text-red"></i>
-                        <span class="nav-link-text">{{ __('Back to your account')}}</span>
-                      </a>
-                    </li>
-                  </ul>
-                <hr class="my-3">
-            @endif
             @if(auth()->user()->hasRole('admin'))
                 @include('layouts.navbars.menus.admin')
-            @else
-                <span></span>
-            @endif
-
-            @if(auth()->user()->hasRole('manager'))
-                @include('layouts.navbars.menus.manager')
             @else
                 <span></span>
             @endif

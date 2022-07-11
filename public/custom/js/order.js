@@ -235,20 +235,32 @@ function setVariants(){
     //3.1 If new option is null, show the variant price
 }
 
-
+$('.modal').on('hide.bs.modal', function() {
+    $("#modalVideo").html('');
+    $("#modalVideo").hide();
+});
 function setCurrentItem(id){
-
 
     var item=items[id];
     currentItem=item;
+    console.log(currentItem);
     previouslySelected=[];
     $('#modalTitle').text(item.name);
     $('#modalName').text(item.name);
     $('#modalPrice').html(item.price);
     $('#modalID').text(item.id);
     $('#quantity').val(1);
-
-    if(item.image != "/default/restaurant_large.jpg"){
+    console.log(item.video_link);
+    if(item.video_link){
+        $("#modalVideo").show();
+        $("#modalVideo").html(`<iframe width="295" height="200" src="${item.video_link}?autoplay=1" title="${item.name}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`);
+        $("#modalDialogItem").addClass("modal-lg");
+        $("#modalImg").hide();
+        $("#modalImgPart").show();
+    } else if(item.image != "/default/restaurant_large.jpg"){
+        $("#modalVideo").html('');
+        $("#modalVideo").hide();
+        $("#modalImg").show();
         $("#modalImg").attr("src",item.image);
         $("#modalDialogItem").addClass("modal-lg");
         $("#modalImgPart").show();

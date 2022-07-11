@@ -741,7 +741,6 @@ class FrontEndController extends Controller
 
     public function restorant($alias)
     {
-
         //Do we have impressum app
         $doWeHaveImpressumApp=Module::has('impressum');
 

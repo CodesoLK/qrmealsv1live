@@ -1,5 +1,9 @@
-##Versions 
+## Versions 
 Qrmealsv1.0.0 First commit
+
+Qrmealsv1.1.0 Added videos to menu
+
+Qrmealsv1.2.0 Sub categories added to menu
 
 ## Test
 sail artisan test --testsuite=Feature

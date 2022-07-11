@@ -73,12 +73,7 @@ Coded by www.creative-tim.com
 <meta name="theme-color" content="#ffffff">
 
 <!-- Custom CSS defined by admin -->
-@if(\Request::route()->getName() != "vendor")
-  <link type="text/css" href="{{ asset('byadmin') }}/front.css" rel="stylesheet">
-@else
-  <link type="text/css" href="{{ asset('byadmin') }}/frontmenu.css" rel="stylesheet">
-@endif
-
+<link type="text/css" href="{{ asset('byadmin') }}/front.css" rel="stylesheet">
 
 </head>
 
@@ -177,11 +172,7 @@ Coded by www.creative-tim.com
     @notifyJs
 
     <!-- Custom JS defined by admin -->
-    @if(\Request::route()->getName() != "vendor")
-        <?php echo file_get_contents(base_path('public/byadmin/front.js')) ?>
-    @else
-        <?php echo file_get_contents(base_path('public/byadmin/frontmenu.js')) ?>
-    @endif
+    <?php echo file_get_contents(base_path('public/byadmin/front.js')) ?>
 
     <script>
         window.translations = {!! Cache::get('translations'.App::getLocale()) !!};
