@@ -151,7 +151,6 @@
 
                 <div class="sub-categories-items-wrp">
                     <div class="sub-categories-wrp {{ clean(str_replace(' ', '', strtolower($category->name)).strval($key)) }}">
-
                         @if ($sub_categories->where('category_id',$category->id)->count() > 0)
                             <div class="sub-category-title mb-2">
                                 {{ __("Sub Categories: ") }}
@@ -209,28 +208,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                <div class="row {{ clean(str_replace(' ', '', strtolower($category->name)).strval($key)) }}">
-                    @foreach ($category->aitems as $item)
-                    
-                        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
-                            <div class="strip">
-                                @if(!empty($item->image))
-                                <figure>
-                                    <a onClick="setCurrentItem({{ $item->id }})" href="javascript:void(0)"><img src="{{ $item->logom }}" loading="lazy" data-src="{{ config('global.restorant_details_image') }}" class="img-fluid lazy" alt=""></a>
-                                </figure>
-                                @endif
-                                <div class="res_title"><b><a onClick="setCurrentItem({{ $item->id }})" href="javascript:void(0)">{{ $item->name }}</a></b></div>
-                                <div class="res_description">{{ $item->short_description}}</div>
-                                <div class="row">
-                                    <div class="col-4"><div class="res_mimimum">@money($item->price, config('settings.cashier_currency'),config('settings.do_convertion'))</div></div>
-                                    <div class="col-8">
-                                        <div class="allergens" style="text-align: right;">
-                                            @foreach ($item->allergens as $allergen)
-                                             <div class='allergen' data-toggle="tooltip" data-placement="bottom" title="{{$allergen->title}}" >
-                                                 <img  src="{{$allergen->image_link}}" />
-                                             </div>
-                                            @endforeach
-                                             
                                         </div>
                                     </div>
                                 @endif
@@ -238,7 +215,7 @@
                         </div>
                     </div>
                 </div>
-
+                
             @endforeach
             @else
                 <div class="row">
