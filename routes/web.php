@@ -23,11 +23,13 @@ Route::post('/search/location', 'FrontEndController@getCurrentLocation')->name('
 Auth::routes(['register' => config('app.isft')]);
 
 
+//Route::get('/home/{lang?}', 'HomeController@index')->name('home')->middleware('isOwnerOnPro');
 
 Route::get('/selectpay/{order}', 'PaymentController@selectPaymentGateway')->name('selectpay');
 Route::get('/selectedpaymentt/{order}/{payment}', 'PaymentController@selectedPaymentGateway')->name('selectedpaymentt');
 
 
+//Route::group(['middleware' => ['auth']], function () {
 Route::group(['middleware' => ['auth','impersonate']], function () {
     Route::get('/home/{lang?}', 'HomeController@index')->name('home')->middleware(['isOwnerOnPro','verifiedSetup']);
 
@@ -37,23 +39,13 @@ Route::group(['middleware' => ['auth','impersonate']], function () {
     Route::name('admin.')->group(function () {
         Route::get('syncV1UsersToAuth0', 'SettingsController@syncV1UsersToAuth0')->name('syncV1UsersToAuth0');
         Route::get('dontsyncV1UsersToAuth0', 'SettingsController@dontsyncV1UsersToAuth0')->name('dontsyncV1UsersToAuth0');
-        Route::resource(config('settings.url_route_plural'), 'RestorantController',[
-            'names' => [
-                'index' => 'restaurants.index',
-                'store' => 'restaurants.store',
-                'edit' => 'restaurants.edit',
-                'create' => 'restaurants.create',
-                'destroy' => 'restaurants.destroy',
-                'update' => 'restaurants.update',
-                'show' => 'restaurants.show'
-            ]
-        ]);
+        Route::resource('restaurants', 'RestorantController');
         Route::put('restaurants_app_update/{restaurant}', 'RestorantController@updateApps')->name('restaurant.updateApps');
+        Route::get('stopimpersonate', 'RestorantController@stopImpersonate')->name('restaurants.stopImpersonate');
 
         Route::get('restaurants_add_new_shift/{restaurant}', 'RestorantController@addnewshift')->name('restaurant.addshift');
 
         Route::get('restaurants/loginas/{restaurant}', 'RestorantController@loginas')->name('restaurants.loginas');
-        Route::get('stopimpersonate', 'RestorantController@stopImpersonate')->name('restaurants.stopImpersonate');
         
 
         Route::get('removedemodata', 'RestorantController@removedemo')->name('restaurants.removedemo');
@@ -105,9 +97,6 @@ Route::group(['middleware' => ['auth','impersonate']], function () {
             Route::post('simpledelivery', 'SimpleDeliveryController@store')->name('simpledelivery.store');
             Route::put('simpledelivery/{delivery}', 'SimpleDeliveryController@update')->name('simpledelivery.update');
             Route::get('simpledelivery/del/{delivery}', 'SimpleDeliveryController@destroy')->name('simpledelivery.delete');
-
-
-            
 
             // Areas
             Route::resource('restoareas', 'RestoareasController');
@@ -166,7 +155,6 @@ Route::group(['middleware' => ['auth','impersonate']], function () {
 
     Route::resource('drivers', 'DriverController');
     Route::get('/driver/{driver}/activate', 'DriverController@activateDriver')->name('driver.activate');
-    Route::get('/nearest_driver/','DriverController@getNearestDrivers')->name('drivers.nearest');
 
     Route::resource('clients', 'ClientController');
     Route::resource('orders', 'OrderController');
@@ -194,6 +182,13 @@ Route::group(['middleware' => ['auth','impersonate']], function () {
     Route::put('profile/password', ['as' => 'profile.password', 'uses' => 'ProfileController@password']);
 
     Route::resource('items', 'ItemsController')->middleware('isOwnerOnPro');
+
+    // Subcategory
+    Route::post('sub-category/add', 'SubCategoryController@store')->name('sub-category.store');
+    Route::post('sub-category/getItems', 'SubCategoryController@indexAjax');
+    Route::post('sub-category/edit', 'SubCategoryController@update')->name('subcategory.update');
+    Route::post('sub-category/delete', 'SubCategoryController@destroy')->name('subcategory.delete');
+
     Route::prefix('items')->name('items.')->group(function () {
         Route::get('reorder/{up}', 'ItemsController@reorderCategories')->name('reorder');
         Route::get('list/{restorant}', 'ItemsController@indexAdmin')->name('admin');
@@ -299,7 +294,7 @@ Route::get('/items/variants/{variant}/extras', 'Items\VariantsController@extras'
 //Languages routes
 $availableLanguagesENV = ENV('FRONT_LANGUAGES', 'EN,English,IT,Italian,FR,French,DE,German,ES,Spanish,RU,Russian,PT,Portuguese,TR,Turkish,ar,Arabic');
 $exploded = explode(',', $availableLanguagesENV);
-if (count($exploded) > 3) {
+if (count($exploded) > 3 && config('app.isqrsaas')) {
 
     $mode="qrsaasMode";
     if(config('settings.landing_to_use')!="system"){
@@ -315,9 +310,6 @@ if (count($exploded) > 3) {
         if(config('settings.is_pos_cloud_mode')){
             $mode="posMode";
         }
-    }
-    if(config('app.isft')){
-        $mode="index";
     }
 
     for ($i = 0; $i < count($exploded); $i += 2) {
@@ -343,7 +335,5 @@ Route::get('order/cancel', 'OrderController@cancel')->name('order.cancel');
 
 Route::post('/fb-order', 'OrderController@fbOrderMsg')->name('fb.order');
 
-Route::get('onboarding', 'FrontEndController@onboarding')->name('sd.onboarding');
-
 Route::get('/{alias}', 'FrontEndController@restorant')->where('alias', '.*');
-
+Route::post('sub-category/font-end', 'FrontEndController@viewAjax');

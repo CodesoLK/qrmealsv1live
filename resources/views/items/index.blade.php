@@ -42,8 +42,12 @@
     </style>
 @endsection
 
+
 @section('content')
+
     @include('items.partials.modals', ['restorant_id' => $restorant_id])
+
+
     
     <div class="header bg-gradient-primary pb-7 pt-5 pt-md-8">
         <div class="container-fluid">
@@ -384,7 +388,9 @@
         if(confirm('Are you sure you want to delete this Sub Category from Database? This will aslo delete all Items Under this Sub Category. This is irreversible step.') == true) {
             var subCatId = $(this).attr('data-sub');
             var category = $(this).attr('data-category');
-            var formAction = "{{ route('subcategory.delete') }}";
+            var formAction = "/sub-category/delete";
+
+
             var CSRF = '@csrf';
 
             var deleteForm = `<form method='post' id="sub-category-delete" action='${formAction}'>

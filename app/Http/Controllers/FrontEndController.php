@@ -30,6 +30,7 @@ use App\Models\Process;
 use Akaunting\Module\Facade as Module;
 use App\Models\Allergens;
 use App\Models\Config;
+use App\SubCategory;
 use DateTime;
 use Spatie\OpeningHours\Exceptions\MaximumLimitExceeded;
 
@@ -740,8 +741,6 @@ class FrontEndController extends Controller
 
     public function restorant($alias)
     {
-       
-        // dd('ok');
         //Do we have impressum app
         $doWeHaveImpressumApp=Module::has('impressum');
 
@@ -848,6 +847,12 @@ class FrontEndController extends Controller
                //throw $th;
            }
 
+            $categories_id = $restorant->categories->pluck('id');
+           $subCategories = SubCategory::where('restaurant_id',$restorant->id)
+                                        ->where('parent_id',null)
+                                        ->whereIn('category_id',$categories_id)
+                                        ->get();
+
 
 
            $viewData=[
@@ -867,6 +872,7 @@ class FrontEndController extends Controller
                 'showLanguagesSelector'=>env('ENABLE_MILTILANGUAGE_MENUS', false) && $restorant->localmenus()->count() > 1,
                 'hasGuestOrders'=>count($previousOrderArray) > 0,
                 'fields'=>[['class'=>'col-12', 'classselect'=>'noselecttwo', 'ftype'=>'select', 'name'=>'Table', 'id'=>'table_id', 'placeholder'=>'Select table', 'data'=>$tablesData, 'required'=>true]],
+                'sub_categories'=>$subCategories,
            ];
            
 
@@ -884,6 +890,8 @@ class FrontEndController extends Controller
         }
     }
 
+
+
     public function findByLocation(Request $request)
     {
         return view('restorants.location');
@@ -900,6 +908,134 @@ class FrontEndController extends Controller
             'data' => $res,
             'status' => true,
             'errMsg' => '',
+        ]);
+    }
+
+
+
+    public function viewAjax(Request $request)
+    {
+        $category_id = $request->category;
+        $parent_id = $request->parent;
+        $category_name = $request->category_name;
+        $key = $request->loop_key;
+        $data = [];
+        $data['category-name'] = $category_name;
+        $data['key'] = $key;
+        $data['back-btn-off'] = "";
+
+        $get_restaurant_id = Categories::where('id',$category_id)->first()->restorant_id;
+
+        if($request->back_click && $request->back_click == 'clicked') {
+            // Get Parent Id
+            $getSubCategory = SubCategory::find($parent_id);
+
+            if($getSubCategory->parent_id == "" || $getSubCategory->parent_id == null) {
+                // only main Category information show
+
+                $sub_categories = SubCategory::where('restaurant_id',$get_restaurant_id)
+                                            ->where('parent_id',null)
+                                            ->where('category_id',$category_id)
+                                            ->get();
+                // return print_r($sub_categories);
+                
+                if($sub_categories == true) {
+                    $data['sub-categories'] = $sub_categories;
+                    $data['sub_success'] = "success";
+                }else {
+                    $data['error'] = "Something Worng! Please Try Again.";
+                }
+
+                // Get Items
+                $getItems = Items::where('category_id',$category_id)
+                            ->where('category_type',1)
+                            ->where('parent_id',null)
+                            ->orderBy('id','desc')
+                            ->get();
+
+                if($getItems == true) {
+                    $data['items'] = $getItems;
+                    $data['item_success'] = "success";
+                }else {
+                    $data['error'] = "Something Worng! Please Try Again.";
+                }
+
+                $data['back-btn-off'] = 'd-none';
+
+            }else {
+                $parent_id = $getSubCategory->parent_id;
+
+                $getSubCategories = SubCategory::where('restaurant_id',$get_restaurant_id)
+                                            ->where('category_id',$category_id)
+                                            ->where('parent_id',$parent_id)
+                                            ->orderBy('id','desc')
+                                            ->get();
+    
+                if($getSubCategories == true) {
+                    $data['sub-categories'] = $getSubCategories;
+                    $data['sub_success'] = "success";
+                }else {
+                    $data['error'] = "Something Worng! Please Try Again.";
+                }
+
+
+                $getItems = Items::where('category_id',$category_id)
+                            ->where('category_type',0)
+                            ->where('parent_id',$parent_id)
+                            ->orderBy('id','desc')
+                            ->get();
+    
+                if($getItems == true) {
+                    $data['items'] = $getItems;
+                    $data['item_success'] = "success";
+                }else {
+                    $data['error'] = "Something Worng! Please Try Again.";
+                }
+
+            }
+
+        }else {
+            if($category_id == "" || $parent_id == "") {
+                $data['error'] = "Something Worng! Please Try Again.";
+            }
+    
+            $getSubCategory = SubCategory::where('restaurant_id',$get_restaurant_id)
+                                            ->where('category_id',$category_id)
+                                            ->where('parent_id',$parent_id)
+                                            ->orderBy('id','desc')
+                                            ->get();
+    
+            if($getSubCategory == true) {
+                $data['sub-categories'] = $getSubCategory;
+                $data['sub_success'] = "success";
+            }else {
+                $data['error'] = "Something Worng! Please Try Again.";
+            }
+            
+            $getItems = Items::where('category_id',$category_id)
+                            ->where('category_type',0)
+                            ->where('parent_id',$parent_id)
+                            ->orderBy('id','desc')
+                            ->get();
+    
+            if($getItems == true) {
+                $data['items'] = $getItems;
+                $data['item_success'] = "success";
+            }else {
+                $data['error'] = "Something Worng! Please Try Again.";
+            }
+        }
+
+        $data['category_id'] = $category_id;
+        $data['restaurant_id'] = $get_restaurant_id;
+        $data['parent_id'] = $parent_id;
+        $data['allergens'] = in_array("allergens", config('global.modules',[]))?Allergens::where('post_type','allergen')->get():[];
+
+        // return print_r($data['allergens']);
+
+                                    
+        return view('restorants.font-end-ajax',[
+            'data'=>$data
         ]);
     }
 }

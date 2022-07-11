@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Categories;
 use App\Items;
 use App\SubCategory;
+use Exception;
+
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
@@ -180,12 +183,21 @@ class SubCategoryController extends Controller
                 $file_type = ['large','medium','thumbnail'];
                 foreach($file_type as $file) {
                     $image_loc = $this->imagePath . $image_name . "_" . $file . ".jpg";
-                    if(file_exists(public_path($image_loc))) {
+
+                    if(File::exists(public_path($image_loc))) {
+
                         File::delete($image_loc);
                     }
                 }
             }
-            $image_name = SubCategory::find($sub_category_id)->delete();
+
+            try{
+                $delete_sub = SubCategory::find($sub_category_id)->delete();
+            }catch(Exception $e) {
+                return back()->with('error',"Something Worng! Please try again.");
+            }
+
+       
         }
 
        return redirect()->route('items.index')->withStatus(__('Sub Category Deleted Successfully!'));

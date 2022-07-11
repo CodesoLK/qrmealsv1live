@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Services\ConfChanger;
 use Akaunting\Module\Facade as Module;
 use App\Models\Allergens;
+use App\SubCategory;
 
 class ItemsController extends Controller
 {
@@ -33,7 +34,6 @@ class ItemsController extends Controller
     {
         if (auth()->user()->hasRole('owner')) {
 
-            
             $canAdd = auth()->user()->restorant->getPlanAttribute()['canAddNewItems'];
             
 
@@ -67,8 +67,6 @@ class ItemsController extends Controller
                 $newDefault->default=1;
                 $newDefault->update();
                 
-                
-                
             }
 
             $currentEnvLanguage = isset(config('config.env')[2]['fields'][0]['data'][config('app.locale')]) ? config('config.env')[2]['fields'][0]['data'][config('app.locale')] : 'UNKNOWN';
@@ -91,6 +89,13 @@ class ItemsController extends Controller
                 $categories=auth()->user()->restorant->categories;
             }
 
+            $get_category_id = $categories->pluck('id');
+            $auth_user_restaurant_id=auth()->user()->restorant->id;
+            $sub_categories = SubCategory::where('restaurant_id',$auth_user_restaurant_id)
+                                            ->where('parent_id',null)
+                                            ->whereIn('category_id',$get_category_id)
+                                            ->get();
+
             return view('items.index', [
                 'hasMenuPDf'=>Module::has('menupdf'),
                 'canAdd'=>$canAdd,
@@ -98,7 +103,8 @@ class ItemsController extends Controller
                 'restorant_id' => auth()->user()->restorant->id,
                 'currentLanguage'=> $currentEnvLanguage,
                 'availableLanguages'=>auth()->user()->restorant->localmenus,
-                'defaultLanguage'=>$defaultLng?$defaultLng->language:""
+                'defaultLanguage'=>$defaultLng?$defaultLng->language:"",
+                'sub_categories' => $sub_categories
                 ]);
         } else {
             return redirect()->route('orders.index')->withStatus(__('No Access'));
@@ -144,6 +150,14 @@ class ItemsController extends Controller
             $defVat=$resto->getConfig('default_tax_value',0);
         }
         $item->vat=$defVat;
+
+        if($request->parent_id && $request->parent_id != "") {
+            $item->parent_id = strip_tags($request->parent_id);
+            $item->category_type = 0;
+        }else {
+            $item->parent_id = null;
+            $item->category_type = 1;
+        }
         
         if ($request->hasFile('item_image')) {
             $item->image = $this->saveImageVersions(
@@ -159,7 +173,7 @@ class ItemsController extends Controller
         }
         $item->save();
 
-        return redirect()->route('items.index')->withStatus(__('Item successfully updated.'));
+        return redirect()->route('items.index')->withStatus(__('Item successfully Added.'));
     }
 
     /**
@@ -192,9 +206,6 @@ class ItemsController extends Controller
                     }
                 }
             }
-
-            
-            
             
             return view('items.edit',
             [
