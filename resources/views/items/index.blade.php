@@ -43,12 +43,10 @@
 @endsection
 
 
-@section('content')
 
+@section('content')
     @include('items.partials.modals', ['restorant_id' => $restorant_id])
 
-
-    
     <div class="header bg-gradient-primary pb-7 pt-5 pt-md-8">
         <div class="container-fluid">
             <div class="header-body">
@@ -209,7 +207,7 @@
                                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                                     <a class="dropdown-item addNewSubCategory" href="javascript:void(0)" data-toggle="modal" data-target="#modal-add-sub-category" data-category="{{ $category->id }}" data-restaurant="{{ $restorant_id }}" data-parent="{{ $singleItem->id }}" data-modal="modal-add-sub-category">{{ __('Add New Subcategory') }}</a>
                                                                     <a class="dropdown-item addNewItem" href="javascript:void(0)" data-category="{{ $category->id }}" data-parent="{{ $singleItem->id }}" data-toggle="modal" data-target="#modal-new-item" data-toggle="tooltip" data-placement="top">{{ __('Add Item') }}</a>
-                                                                    <a class="dropdown-item subCategoryEdit" href="javascript:void(0)" data-toggle="modal" data-target="#modal-edit-sub-category" data-toggle="tooltip" data-placement="top" data-sub="{{ $singleItem->id }}">{{ __('Edit') }}</a>
+                                                                    <a class="dropdown-item subCategoryEdit" href="javascript:void(0)" data-toggle="modal" data-target="#modal-edit-sub-category" data-toggle="tooltip" data-placement="top" data-sub="{{ $singleItem->id }}" data-name="{{ $singleItem->sub_category_name }}" data-desc="{{ $singleItem->sub_category_description }}" data-image="{{ $singleItem->logom }}">{{ __('Edit') }}</a>
                                                                     <a class="dropdown-item warning red subCategoryDelete" data-sub="{{ $singleItem->id }}" data-category="{{ $category->id }}"  href="javascript:void(0)">{{ __('Delete') }}</a>
                                                                 </div>
                                                             </div>
@@ -378,9 +376,16 @@
 
     // Sub Category Edit
     $(document).on('click','.subCategoryEdit',function(event){
-        event.preventDefault();
+        // event.preventDefault();
         var subCategory = $(this).attr('data-sub');
+        var subCatName = $(this).attr('data-name');
+        var subCatDesc = $(this).attr('data-desc');
+        var subCatImage = $(this).attr('data-image');
+
         $('#modal-edit-sub-category form #sub_category_id').val(subCategory);
+        $('#modal-edit-sub-category form #sub_cat_name').val(subCatName);
+        $('#modal-edit-sub-category form #sub_category_description').val(subCatDesc);
+        $('#modal-edit-sub-category form .fileinput-preview img').attr('src',subCatImage);
     });
 
     // Sub Category Delete 
@@ -389,8 +394,6 @@
             var subCatId = $(this).attr('data-sub');
             var category = $(this).attr('data-category');
             var formAction = "/sub-category/delete";
-
-
             var CSRF = '@csrf';
 
             var deleteForm = `<form method='post' id="sub-category-delete" action='${formAction}'>

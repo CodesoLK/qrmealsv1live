@@ -30,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+              $this->app['request']->server->set('HTTPS', true);
+
         Paginator::defaultView('pagination::bootstrap-4');
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
